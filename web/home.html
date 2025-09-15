@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html ng-app="myapp">
 	<head>
@@ -425,9 +426,9 @@
 		
 	<!-- angular js -->
 	<script src="js/angular_data.js"></script>
-	<body onload="onLoad()">		
+	<body onload="onLoad()">		 
 
-	<script>
+<script>
 document.addEventListener("DOMContentLoaded", function () {
   const chatbotBtn = document.getElementById("chatbot-button");
   const chatbotBox = document.getElementById("chatbot-box");
@@ -436,53 +437,168 @@ document.addEventListener("DOMContentLoaded", function () {
   const msgContainer = document.querySelector(".chatbot-messages");
   const input = document.getElementById("chatbot-text");
 
-  // Open chatbot
+  // store history
+  let history = [];
+  let historyIndex = -1;
+
+  // ===== Utility Functions =====
+  function addUserMessage(text) {
+    const userMsg = document.createElement("div");
+    userMsg.className = "message user";
+    userMsg.innerText = text;
+    msgContainer.appendChild(userMsg);
+    msgContainer.scrollTop = msgContainer.scrollHeight;
+  }
+
+  function addBotMessage(text) {
+    const botMsg = document.createElement("div");
+    botMsg.className = "message bot";
+    botMsg.innerText = text;
+    msgContainer.appendChild(botMsg);
+    msgContainer.scrollTop = msgContainer.scrollHeight;
+  }
+
+  function handleMyComplaints(userEmail) {
+  fetch("complaint_getbyuser.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: userEmail })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success == 1 && data.complaints.length > 0) {
+      let reply = "📋 Your Complaints:\n\n";
+      data.complaints.forEach(c => {
+        reply +=
+          "🆔 ID: " + c.cus_id + "\n" +
+          "📝 Issue: " + c.field_7 + "\n" +
+          "📌 Status: " + c.field_9 + "\n" +
+          "📅 Date: " + c.created_date + "\n\n";
+      });
+      addBotMessage(reply);
+    } else {
+      addBotMessage("⚠️ " + (data.message || "No complaints found."));
+    }
+  })
+  .catch(err => {
+    addBotMessage("❌ Error fetching complaints.");
+  });
+}
+
+
+
+  // ===== Bot Features =====
+  function handleComplaintById(compNo) {
+    fetch("complaint_getbyid.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ complaint_no: compNo })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success == 1 && data.details) {
+        const c = data.details;
+        addBotMessage(
+          "📋 Complaint #" + c.cus_id +
+          "\n📧 Email: " + c.email +
+          "\n📝 Issue: " + c.field_7 +
+          "\n⚡ Priority: " + c.field_8 +
+          "\n📌 Status: " + c.field_9 +
+          "\n❓ Reason: " + c.field_10 +
+          "\n✅ Solution: " + c.field_11 +
+          "\n📅 Date: " + c.created_date
+        );
+      } else {
+        addBotMessage("⚠️ " + (data.message || "Complaint not found."));
+      }
+    })
+    .catch(err => {
+      addBotMessage("❌ Error fetching complaint.");
+    });
+  }
+
+  function handleContact() {
+    addBotMessage(
+      "📞 Name: Admin\n✉️ Email: admin@gmail.com\n📱 Mobile: 1234567890"
+    );
+  }
+
+  function handleDefault(text) {
+    addBotMessage("🤖 You said: " + text);
+  }
+
+  // ===== Main Send Message =====
+  function sendMessage() {
+    const text = input.value.trim();
+    if (!text) return;
+
+    // save to history
+    history.push(text);
+    historyIndex = history.length;
+
+    // add user msg
+    addUserMessage(text);
+
+    // reset input
+    input.value = "";
+
+    // Bot logic
+    if (text.toLowerCase().startsWith("complaint no")) {
+      const parts = text.split(" ");
+      const compNo = parts[parts.length - 1];
+      handleComplaintById(compNo);
+
+    } else if (text.toLowerCase() === "contact") {
+      handleContact();
+
+    }else if (text.toLowerCase() === "my complaints") {
+  // TODO: replace with session user email dynamically
+  handleMyComplaints("user@gmail.com");
+
+  }  
+    else {
+      handleDefault(text);
+    }
+  }
+
+  // ===== Events =====
   chatbotBtn.addEventListener("click", () => {
     chatbotBox.style.display = "flex";
     chatbotBtn.style.display = "none";
   });
 
-  // Close chatbot
   closeChat.addEventListener("click", () => {
     chatbotBox.style.display = "none";
     chatbotBtn.style.display = "flex";
   });
 
-  // Send message
-  function sendMessage() {
-    const text = input.value.trim();
-    if (!text) return;
-
-    const userMsg = document.createElement("div");
-    userMsg.className = "message user";
-    userMsg.innerText = text;
-    msgContainer.appendChild(userMsg);
-
-    // Dummy bot reply
-    setTimeout(() => {
-      const botMsg = document.createElement("div");
-      botMsg.className = "message bot";
-
-      if (text.toLowerCase() === "contact") {
-      botMsg.innerText = "📞 Name: Admin\n✉️ Email: admin@gmail.com\n📱 Mobile: 1234567890";
-    } else {
-      botMsg.innerText = "🤖 You said: " + text;
-    }
-
-      msgContainer.appendChild(botMsg);
-      msgContainer.scrollTop = msgContainer.scrollHeight;
-    }, 1000);
-
-    input.value = "";
-    msgContainer.scrollTop = msgContainer.scrollHeight;
-  }
-
   sendBtn.addEventListener("click", sendMessage);
-  input.addEventListener("keypress", function (e) {
-    if (e.key === "Enter") sendMessage();
+
+  input.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+      sendMessage();
+    } else if (e.key === "ArrowUp") {
+      if (historyIndex > 0) {
+        historyIndex--;
+        input.value = history[historyIndex];
+      }
+      e.preventDefault();
+    } else if (e.key === "ArrowDown") {
+      if (historyIndex < history.length - 1) {
+        historyIndex++;
+        input.value = history[historyIndex];
+      } else {
+        historyIndex = history.length;
+        input.value = "";
+      }
+      e.preventDefault();
+    }
   });
 });
 </script>
+
+
+
 
 </body>
 </html>
