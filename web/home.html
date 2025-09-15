@@ -151,7 +151,7 @@
   right: 20px;
   width: 360px;
   height: 600px;
-  background: #fff;
+  background: #eceaeaff;
   border-radius: 12px;
   box-shadow: 0px 4px 15px rgba(0,0,0,0.3);
   display: none;
@@ -203,7 +203,7 @@
 }
 
 .message.bot {
-  background: #f1f1f1;
+  background: #d6d4d4ff;
    float: left;
   align-self: flex-start;
 }
@@ -382,11 +382,10 @@
 						<!-- Chatbot Box -->
 						<div id="chatbot-box">
 						<div class="chatbot-header">
-							<span>Chatbot</span>
+							<span>Complaint Chatbot </span>
 							<button id="close-chatbot">&times;</button>
 						</div>
 						<div class="chatbot-messages">
-							<div class="message bot">👋 Hi! How can I help you?</div>
 						</div>
 						<div class="chatbot-input">
 							<input type="text" id="chatbot-text" placeholder="Type your message..." />
@@ -427,7 +426,6 @@
 	<!-- angular js -->
 	<script src="js/angular_data.js"></script>
 	<body onload="onLoad()">		 
-
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   const chatbotBtn = document.getElementById("chatbot-button");
@@ -436,6 +434,31 @@ document.addEventListener("DOMContentLoaded", function () {
   const sendBtn = document.getElementById("send-btn");
   const msgContainer = document.querySelector(".chatbot-messages");
   const input = document.getElementById("chatbot-text");
+  const LOGGED_IN_EMAIL = sessionStorage.getItem("userEmail") || "";
+  const LOGGED_IN_NAME  = sessionStorage.getItem("userName") || "";
+  let chatState = "menu"; // default state
+
+  const FAQ = [
+    {
+      q: "How to raise a complaint?",
+      a: "➡ By clicking on the Complaint tab on your Home page. It will redirect to the Create Complaint page where you enter the details and post the complaint."
+    },
+    {
+      q: "How long does it take to resolve complaints?",
+      a: "➡ It usually takes less than 7 to 10 days. If it’s more than 10 days, you can contact the admin."
+    },
+    {
+      q: "How can I see the status of a complaint?",
+      a: "➡ By entering option 1 in chatbot or typing 'complaint no 35' (for example). You can also use the 'Complaint Status' tab on the Home page, where you can see details and images."
+    }
+  ];
+
+  // === Initial Greeting ===
+  if (LOGGED_IN_NAME) {
+    addBotMessageDelayed("👋 Hi " + LOGGED_IN_NAME + "! How can I help you?");
+  } else {
+    addBotMessageDelayed("👋 Hi! How can I help you?");
+  }
 
   // store history
   let history = [];
@@ -458,34 +481,38 @@ document.addEventListener("DOMContentLoaded", function () {
     msgContainer.scrollTop = msgContainer.scrollHeight;
   }
 
+  function addBotMessageDelayed(text, delay = 650) {
+    setTimeout(() => {
+      addBotMessage(text);
+    }, delay);
+  }
+
   function handleMyComplaints(userEmail) {
-  fetch("complaint_getbyuser.php", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: userEmail })
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.success == 1 && data.complaints.length > 0) {
-      let reply = "📋 Your Complaints:\n\n";
-      data.complaints.forEach(c => {
-        reply +=
-          "🆔 ID: " + c.cus_id + "\n" +
-          "📝 Issue: " + c.field_7 + "\n" +
-          "📌 Status: " + c.field_9 + "\n" +
-          "📅 Date: " + c.created_date + "\n\n";
-      });
-      addBotMessage(reply);
-    } else {
-      addBotMessage("⚠️ " + (data.message || "No complaints found."));
-    }
-  })
-  .catch(err => {
-    addBotMessage("❌ Error fetching complaints.");
-  });
-}
-
-
+    fetch("complaint_getbyuser.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: userEmail })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success == 1 && data.complaints.length > 0) {
+        let reply = "📋 Your Complaints:\n\n";
+        data.complaints.forEach(c => {
+          reply +=
+            "🆔 ID: " + c.cus_id + "\n" +
+            "📝 Issue: " + c.field_7 + "\n" +
+            "📌 Status: " + c.field_9 + "\n" +
+            "📅 Date: " + c.created_date + "\n\n";
+        });
+        addBotMessageDelayed(reply);
+      } else {
+        addBotMessageDelayed("⚠️ " + (data.message || "No complaints found."));
+      }
+    })
+    .catch(err => {
+      addBotMessageDelayed("❌ Error fetching complaints.");
+    });
+  }
 
   // ===== Bot Features =====
   function handleComplaintById(compNo) {
@@ -498,7 +525,9 @@ document.addEventListener("DOMContentLoaded", function () {
     .then(data => {
       if (data.success == 1 && data.details) {
         const c = data.details;
-        addBotMessage(
+
+        // format main details
+        let reply =
           "📋 Complaint #" + c.cus_id +
           "\n📧 Email: " + c.email +
           "\n📝 Issue: " + c.field_7 +
@@ -506,25 +535,74 @@ document.addEventListener("DOMContentLoaded", function () {
           "\n📌 Status: " + c.field_9 +
           "\n❓ Reason: " + c.field_10 +
           "\n✅ Solution: " + c.field_11 +
-          "\n📅 Date: " + c.created_date
-        );
+          "\n📅 Date: " + c.created_date;
+
+        addBotMessageDelayed(reply);
+
+        // === Extra logic ===
+        if (c.field_9.toLowerCase() === "completed") {
+          return; // ✅ already completed
+        }
+
+        // Parse complaint date
+        const complaintDate = new Date(c.created_date);
+        const today = new Date();
+        const diffDays = Math.floor((today - complaintDate) / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 10) {
+          const remaining = 10 - diffDays;
+          addBotMessageDelayed("⌛ Your complaint will be approved or rejected within " + remaining + " days.");
+        } else {
+          addBotMessageDelayed("⚠️ Your complaint has been pending for over 10 days.\nWould you like to contact the admin? (yes/no)");
+          chatState = "awaiting_admin_contact_decision";
+        }
       } else {
-        addBotMessage("⚠️ " + (data.message || "Complaint not found."));
+        addBotMessageDelayed("⚠️ " + (data.message || "Complaint not found."));
       }
     })
     .catch(err => {
-      addBotMessage("❌ Error fetching complaint.");
+      addBotMessageDelayed("❌ Error fetching complaint.");
     });
   }
 
   function handleContact() {
-    addBotMessage(
+    addBotMessageDelayed(
       "📞 Name: Admin\n✉️ Email: admin@gmail.com\n📱 Mobile: 1234567890"
     );
   }
 
   function handleDefault(text) {
-    addBotMessage("🤖 You said: " + text);
+    addBotMessageDelayed("🤖 You said: " + text);
+  }
+
+  function handleCustomCommands(text) {
+    if (text.toLowerCase().startsWith("complaint no")) {
+      const parts = text.split(" ");
+      const compNo = parts[parts.length - 1];
+      handleComplaintById(compNo);
+
+    } else if (text.toLowerCase() === "contact") {
+      handleContact();
+
+    } else if (text.toLowerCase() === "my complaints") {
+      if (LOGGED_IN_EMAIL) {
+        handleMyComplaints(LOGGED_IN_EMAIL);
+      } else {
+        addBotMessageDelayed("⚠️ Please log in to see your complaints.");
+      }
+
+    } else {
+      handleDefault(text);
+    }
+  }
+
+  function isCustomCommand(text) {
+    const lower = text.toLowerCase();
+    return (
+      lower.startsWith("complaint no") ||
+      lower === "contact" ||
+      lower === "my complaints"
+    );
   }
 
   // ===== Main Send Message =====
@@ -542,22 +620,74 @@ document.addEventListener("DOMContentLoaded", function () {
     // reset input
     input.value = "";
 
-    // Bot logic
-    if (text.toLowerCase().startsWith("complaint no")) {
-      const parts = text.split(" ");
-      const compNo = parts[parts.length - 1];
-      handleComplaintById(compNo);
+    // === Step 1: Always check for custom commands first ===
+    if (isCustomCommand(text)) {
+      handleCustomCommands(text);
+      chatState = "menu"; 
+      return; 
+    }
 
-    } else if (text.toLowerCase() === "contact") {
-      handleContact();
+    // === Step 2: Menu-driven flow ===
+    if (chatState === "menu") {
+      addBotMessageDelayed(
+        "Please choose an option:\n" +
+        "1️⃣ Complaint Status\n" +
+        "2️⃣ All Complaints\n" +
+        "3️⃣ Contact Details\n" +
+        "4️⃣ Help / FAQ"
+      );
+      chatState = "awaiting_choice";
 
-    }else if (text.toLowerCase() === "my complaints") {
-  // TODO: replace with session user email dynamically
-  handleMyComplaints("user@gmail.com");
+    } else if (chatState === "awaiting_choice") {
+      if (text === "1") {
+        addBotMessageDelayed("Please enter your complaint number:");
+        chatState = "awaiting_complaint_id";
 
-  }  
-    else {
-      handleDefault(text);
+      } else if (text === "2") {
+        if (LOGGED_IN_EMAIL) {
+          handleMyComplaints(LOGGED_IN_EMAIL);
+        } else {
+          addBotMessageDelayed("⚠️ Please log in to see your complaints.");
+        }
+        chatState = "menu";
+
+      } else if (text === "3") {
+        handleContact();
+        chatState = "menu";
+
+      } else if (text === "4" || text.toLowerCase() === "help" || text.toLowerCase() === "faq") {
+        let reply = "📖 Help / FAQ:\n";
+        FAQ.forEach((item, index) => {
+          reply += (index + 1) + ". " + item.q + "\n";
+        });
+        reply += "\nPlease enter the number of the question to see the answer.";
+        addBotMessageDelayed(reply);
+        chatState = "awaiting_faq_choice";
+
+      } else {
+        addBotMessageDelayed("❌ Invalid option. Please type 1, 2, 3, or 4.");
+      }
+
+    } else if (chatState === "awaiting_complaint_id") {
+      handleComplaintById(text);
+      chatState = "menu";
+
+    } else if (chatState === "awaiting_admin_contact_decision") {
+      if (text.toLowerCase() === "yes") {
+        handleContact();
+      } else {
+        addBotMessageDelayed("🙏 Thank you for your patience. Please visit again.");
+      }
+      chatState = "menu";
+
+    } else if (chatState === "awaiting_faq_choice") {
+      const choice = parseInt(text);
+      if (!isNaN(choice) && choice >= 1 && choice <= FAQ.length) {
+        addBotMessageDelayed(FAQ[choice - 1].a);
+      } else {
+        addBotMessageDelayed("❌ Invalid choice. Please enter a valid FAQ number.");
+      }
+      chatState = "menu";
     }
   }
 
@@ -594,7 +724,8 @@ document.addEventListener("DOMContentLoaded", function () {
       e.preventDefault();
     }
   });
-});
+
+});  
 </script>
 
 

@@ -26,11 +26,16 @@ else
 
 		if (mysqli_num_rows($result))
 		{
-			$Allresponse = mysqli_fetch_array($result);
-			// temp user array
+			 $Allresponse = mysqli_fetch_array($result);
+
+			$_SESSION['email'] = $get_empid;
+			$_SESSION['name']  = $Allresponse['name']; // ✅ store in PHP session
+
 			$response = array();
-			$response = $Allresponse;
-			$response["success"] = 1;	
+			$response["success"] = 1;
+			$response["email"]   = $Allresponse['email'];
+			$response["name"]    = $Allresponse['name']; // ✅ include in JSON response
+
 			echo json_encode($response);
 		} 
 		else
