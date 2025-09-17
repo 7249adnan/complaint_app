@@ -211,7 +211,7 @@
                             <span></span> </div>							
                         
                         <div class="styled-input">
-							<input  ng-model="mobile"  type="number" />
+							<input  ng-model="mobile"  oninput="if(this.value.length > 10) this.value = this.value.slice(0,10);" type="number" />
                             <label>Mobile</label>
                             <span></span> </div>
 									

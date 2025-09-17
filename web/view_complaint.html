@@ -43,82 +43,202 @@
 		<![endif]-->
 
         <style>
-            .page-wrap {
-                max-width: 75rem;
-                margin: 0 auto;
-            }
+      /* Grid Layout for Cards */
+.complaint-grid {
 
-            h1 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 20px;
+  margin: 20px;
+  margin-top:40px;
+}
 
-                font-size: 1.5rem;
-                letter-spacing: -1px;
-                margin: 1.25rem 0;
-            }
+/* Complaint Card */
+.complaint-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
 
-            input:focus ~ label, textarea:focus ~ label, input:valid ~ label, textarea:valid ~ label {
-                font-size: 0.75em;
+.complaint-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+}
 
-                top: -2.25rem;
-                -webkit-transition: all 0.125s ease;
-                transition: all 0.125s ease;
-            }
+/* Bigger, modern title */
+.complaint-card h3 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+  color: #111;
+  display: flex;
+  align-items: center;
+}
 
-            .styled-input {
-                left:10px;
-                width: 90%;
-                margin: 2rem 0 1rem;
-                position: relative;
-            }
+.complaint-card p {
+  font-size: 1.8rem;
+  line-height: 1.6;
+  margin: 6px 0;
+  color: #333;
+}
 
-            .styled-input label {
-                color: #999;
-                padding: 1rem;
-                position: absolute;
-                top: 0;
-                left: 0;
-                -webkit-transition: all 0.25s ease;
-                transition: all 0.25s ease;
-                pointer-events: none;
-            }
+/* Status Badges */
+p.status {
+  font-size: 2rem;
+  font-weight: bold;
+  padding: 4px 12px;
+  border-radius: 20px;
+  display: inline-block;
+}
+
+p.status.completed { background: #e8f5e9; color: #2e7d32; }
+p.status.pending { background: #fff8e1; color: #ef6c00; }
+p.status.rejected { background: #ffebee; color: #c62828; }
+
+/* Buttons modern */
+.btn-group {
+  margin-top: 15px;
+}
+
+.btn-modern {
+  display: inline-flex;
+  align-items: center;
+  background: #1976d2;
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 500;
+  padding: 8px 14px;
+  margin: 5px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.btn-modern i {
+  margin-right: 6px;
+  font-size: 1rem;
+  line-height: 1;   /* normalize icon height */
+  vertical-align: middle;  /* align with text */
+}
+
+.btn-modern {
+  display: inline-flex;
+  align-items: center;  /* vertically centers icon + text */
+  justify-content: center;
+}
+
+.btn-modern:hover {
+  background: #125ca1;
+  transform: translateY(-2px);
+}
+
+/* Proof box */
+.proof-title {
+  font-weight: bold;
+  color: #1565c0;
+  margin-top: 15px;
+  display: flex;
+  align-items: center;
+  font-size: 1.1rem;
+}
+
+.proof-box {
+  border: 1px dashed #ccc;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 12px 0;
+  text-align: center;
+  background: #fafafa;
+}
+
+.proof-box img {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 6px;
+}
+
+/* Search Box Container */
+.search-box {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+/* Wrapper */
+.search-input-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+}
+
+/* Input */
+.search-input-wrapper input {
+  width: 150%;
+  padding: 12px 40px 12px 40px;
+  border: 2px solid #ddd;
+  border-radius: 20px;
+  font-size: 2rem;
+  outline: none;
+  background: #fff;
+  transition: all 0.3s ease;
+}
+
+.search-input-wrapper input:focus {
+  border-color: #1976d2;
+  box-shadow: 0 0 8px rgba(25, 118, 210, 0.3);
+}
+
+/* Search Icon */
+.search-input-wrapper i {
+  position: absolute;
+  top: 50%;
+  left: 15px;
+  transform: translateY(-50%);
+  color: #888;
+  font-size: 2rem;
+}
+
+/* Floating Label */
+.search-input-wrapper label {
+  position: absolute;
+  top: 50%;
+  left: 45px;
+  transform: translateY(-50%);
+  color: #757575ff;
+  font-size: 1.4rem;
+  pointer-events: none;
+  transition: all 0.2s ease;
+}
+
+.search-input-wrapper input:focus ~ label,
+.search-input-wrapper input:valid ~ label {
+  top: -8px;
+  left: 40px;
+  font-size: 0.8rem;
+  color: #1976d2;
+  background: #fff;
+  padding: 0 5px;
+}
+
+		/* Decorative underline */
+		.search-input-wrapper span {
+		position: absolute;
+		left: 40px;
+		bottom: 8px;
+		height: 2px;
+		width: 0;
+		background: #1976d2;
+		transition: width 0.3s ease;
+		}
+
+		.search-input-wrapper input:focus ~ span {
+		width: calc(140% - 50px);
+		}
 
 
-
-            input,
-            textarea {
-                position: relative;
-                height: 2.9em;
-                border: 0px solid #bebebe;
-                border-bottom-width: 1px;
-                width: 100%;
-            }
-
-            input ~ span,
-            textarea ~ span {
-                display: block;
-                width: 0;
-                height:1px;
-                background: #03a3e8;
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                -webkit-transition: all 0.125s ease;
-                transition: all 0.125s ease;
-            }
-
-            input:focus,
-            textarea:focus { outline: 0; }
-
-            input:focus ~ span,
-            textarea:focus ~ span {
-                width: 100%;
-                -webkit-transition: all 0.075s ease;
-                transition: all 0.075s ease;
-            }
-
-            textarea {
-                width: 100%;
-                min-height: 15em;
-            }
         </style>
 
 <!-- script back button -->
@@ -208,85 +328,96 @@
 				<!-- Search Results --> 
 				<h2 class="content-sub-heading" style="text-align:center;font-size:40px;color:rgb(69,90,100);font-weight:200">
 				View Complaint Status</h2>
-				<div style="position: relative;left: 10px;">
-					<form class="form"  >
-					<div class="styled-input">
-                            <input ng-model="search_field" type="text"  />
-                            <label>Search</label>
-                            <span></span> 
-							</div>
+				<div class="search-box">
+					<form class="form">
+						<div class="search-input-wrapper">
+						<i class="fa fa-search"></i>
+						<input ng-model="search_field" type="text" required />
+						<label>Search complaints . . .</label>
+						<span></span>
+						</div>
 					</form>
-				
-				</div>	
-				
-			<div  class="row" ng-repeat="x in details | filter : search_field |orderBy:'cus_id':true ">
-				<div  style="color:#000;font-weight:300;margin-left:50px;font-size:19px;"class="col-md-12">
+					</div> 
 
-					<p>Complaint ID: {{x.cus_id}} </p>
-					<p style="color:green;"><b>Status: {{x.field_9}}<b></p>	
-					<p>Name: {{x.field_1}} </p>
-					<p>Complaint:{{x.field_7}}</p>
-					<p>Door No/Address: {{x.field_3}} Place: {{x.field_4}}</p>
-					<p>Landmark: {{x.field_2}}</p>
-					<p>Location: {{x.field_5}}</p>
-					<p>Type: {{x.field_6}}</p>
-					<p>Complaint Notes: {{x.field_12}}</b></p>					
-					<p>Priority: {{x.field_8}}</p>					
 				
-					<p>Lat : {{x.field_15}}</p>					
-					<p>Long: {{x.field_16}}</p>				
-					<p style="color:green;">Reason: {{x.field_10}}</p>
-					<p style="color:green;">Solution: {{x.field_11}}</p>
-					
-					<a ng-click="update_id(x.cus_id)" class="btn" style="border-radius:4px; color:#fff; 
-					text-transform:none; background-color:#F14742; width:auto; height:2em; padding:2px 0 2px 0;" >
-					Update Map
-					</a>					
-					<a ng-click="upload_photo(x.cus_id)" class="btn" style="border-radius:4px; color:#fff; 
-					text-transform:none; background-color:#F14742; width:auto; height:2em; padding:2px 0 2px 0;" >
-					Upload Photo	
-					</a>
-				
-					<a  ng-click="post_feedback(x.field_5,x.field_6)"  class="btn" style="border-radius:4px; color:#fff; 
-					text-transform:none; background-color:#F14742; width:auto; height:2em; padding:2px 0 2px 0;" >
-					Feedback
-					</a>
-					<p style="color:blue;">User Proof </p>					
-					<img width="300" height="300" src="{{x.field_13}}"/><br>		
-					<p style="color:blue;">Completed Proof </p>					
-					<img width="300" height="300" src="{{x.field_14}}"/><br>
-					<hr>
-					
+			<div class="complaint-grid">
+			<div class="complaint-card" ng-repeat="x in details | filter : search_field |orderBy:'cus_id':true">
+				<h3><i class="fa fa-file-text-o"></i> &nbsp; Complaint ID: {{x.cus_id}}</h3>
+				<p class="status"><i class="fa fa-info-circle"></i> Status: {{x.field_9}}</p>
+				<p><i class="fa fa-user"></i> Name: {{x.field_1}}</p>
+				<p><i class="fa fa-exclamation-triangle"></i> Complaint: {{x.field_7}}</p>
+				<p><i class="fa fa-home"></i> Address: {{x.field_3}}, {{x.field_4}}</p>
+				<p><i class="fa fa-map-marker"></i> Landmark: {{x.field_2}}</p>
+				<p><i class="fa fa-location-arrow"></i> Location: {{x.field_5}}</p>
+				<p><i class="fa fa-tag"></i> Type: {{x.field_6}}</p>
+				<p><i class="fa fa-sticky-note"></i> Complaint Notes: {{x.field_12}}</p>
+				<p class="priority"><i class="fa fa-flag"></i> Priority: {{x.field_8}}</p>
+				<p><i class="fa fa-globe"></i> Lat: {{x.field_15}} | Long: {{x.field_16}}</p>
+				<p style="color:green;"><i class="fa fa-question-circle"></i> Reason: {{x.field_10}}</p>
+				<p style="color:green;"><i class="fa fa-check-circle"></i> Solution: {{x.field_11}}</p>
+
+				<!-- Buttons -->
+				<div class="btn-group">
+					<button ng-click="update_id(x.cus_id)" class="btn-modern btn-warning">
+						<i class="fa fa-map-marker"></i> Update Map
+					</button>
+					<button ng-click="upload_photo(x.cus_id)" class="btn-modern btn-success">
+						<i class="fa fa-upload"></i> Upload Photo
+					</button>
+					<button ng-click="post_feedback(x.field_5,x.field_6)" class="btn-modern btn-danger">
+						<i class="fa fa-comment"></i> Feedback
+					</button>
 				</div>
-				
+
+
+				<!-- User Proof -->
+				<p class="proof-title"><i class="fa fa-user"></i> User Proof</p>
+				<div class="proof-box" ng-if="x.field_13 && x.field_13 !== ''">
+				<img ng-src="{{x.field_13}}" />
+				</div>
+				<div class="proof-box" ng-if="!x.field_13 || x.field_13 === ''">
+				<p>❌ You haven’t uploaded a proof photo.</p>
+				</div>
+
+				<!-- Completed Proof -->
+				<p class="proof-title"><i class="fa fa-check"></i> Completed Proof</p>
+				<div class="proof-box" ng-if="x.field_14 && x.field_14 !== ''">
+				<img ng-src="{{x.field_14}}" />
+				</div>
+				<div class="proof-box" ng-if="!x.field_14 || x.field_14 === ''">
+				<p>⚠️ Authority hasn’t uploaded completed proof till now.</p>
+				</div>
 			</div>
-				<div class="table-responsive card">
-					<table class="table table-hover table-stripe" title="Default Tabl">
-					
-						<!-- Get Results Reverse
-						<tbody ng-repeat="x in details | filter : search_field |orderBy:'cus_id':true  ">
-						<p> Name</p>
-							<tr>
-								<td ng-bind="x.field_2"></td>	
-								<td ng-bind="x.field_3"></td>
-							</tr>
-						<p> Name</p>
-							<tr>
-								<td ng-bind="x.field_4"></td>
-								<td ng-bind="x.field_5"></td>
-							</tr>
-								<td ng-bind="x.field_6"></td>
-								<td ng-bind="x.field_7"></td>
-								
-								<td>
-									<a class="btn" style="border-radius:4px; color:#fff; text-transform:none; background-color:#F14742; width:2.5em; height:2em; padding:2px 0 2px 0;" ng-click="sales_delete(x.customer_id)">
-										<img style="width:25px; height:25px;" class="icon icon-10x" src="images/icons/delete2.png"/>
-									</a>
-								</td>
-						</tbody>
-					</table>
-					-->
-				</div>
+			</div>
+
+
+			<div class="table-responsive card">
+				<table class="table table-hover table-stripe" title="Default Tabl">
+				
+					<!-- Get Results Reverse
+					<tbody ng-repeat="x in details | filter : search_field |orderBy:'cus_id':true  ">
+					<p> Name</p>
+						<tr>
+							<td ng-bind="x.field_2"></td>	
+							<td ng-bind="x.field_3"></td>
+						</tr>
+					<p> Name</p>
+						<tr>
+							<td ng-bind="x.field_4"></td>
+							<td ng-bind="x.field_5"></td>
+						</tr>
+							<td ng-bind="x.field_6"></td>
+							<td ng-bind="x.field_7"></td>
+							
+							<td>
+								<a class="btn" style="border-radius:4px; color:#fff; text-transform:none; background-color:#F14742; width:2.5em; height:2em; padding:2px 0 2px 0;" ng-click="sales_delete(x.customer_id)">
+									<img style="width:25px; height:25px;" class="icon icon-10x" src="images/icons/delete2.png"/>
+								</a>
+							</td>
+					</tbody>
+				</table>
+				-->
+			</div>
 	
 		<script src="vendor/jquery/jquery.js"></script>
 		<script src="vendor/bootstrap/bootstrap.js"></script>
